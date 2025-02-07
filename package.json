@@ -1,0 +1,18 @@
+{
+  "name": "template-express",
+  "version": "1.0.0",
+  "description": "```bash\r # clone repository\r # add package-lock.json to .gitignore\r # edit README.md",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file=.env server.js",
+    "dev": "node --env-file=.env --watch server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0"
+  }
+}
