@@ -5,6 +5,7 @@ const index = (req, res) => {
     const sql = "SELECT * FROM properties";
     // eseguiamo la query!
     connection.query(sql, (err, results) => {
+        console.log(results)
         if (err)
             return res.status(500).json({ error: "Database query failed" });
         res.json(results);
@@ -26,9 +27,22 @@ const show = (req, res) => {
         if (propertyResults.length === 0)
             return res.status(404).json({ error: "post not found" });
 
-        // recuperiamo il post
-        const property = propertyResults[0];
-        res.json(property);
+        const likesSql = `
+            SELECT COUNT(id) AS total_likes FROM likes
+            WHERE property_id = ?
+        `;
+
+        connection.query(likesSql, [id], (err, likesResults) => {
+            if (err)
+                return res.status(500).json({ error: "Database query failed" });
+            if (likesResults.length === 0)
+                return res.status(404).json({ error: "post not found" });
+
+            // recuperiamo il post
+            const property = propertyResults[0];
+            property.total_likes = likesResults[0].total_likes;
+            res.json(property);
+        });
     });
 };
 
