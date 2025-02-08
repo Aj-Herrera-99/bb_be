@@ -48,8 +48,6 @@ const show = (req, res) => {
                     return res
                         .status(500)
                         .json({ error: "Database query failed" });
-                if (imagesResults.length === 0)
-                    return res.status(404).json({ error: "post not found" });
 
                 // recuperiamo il post
                 const property = propertyResults[0];
