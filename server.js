@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require("cors")
+const cors = require("cors");
 // create a server instance
 const app = express();
 
@@ -10,6 +10,8 @@ const port = process?.env.PORT || 3000;
 const errorsHandler = require("./middlewares/errorsHandles");
 const notFound = require("./middlewares/notFound");
 const postsRouter = require("./routers/postsRouter");
+const propertiesRouter = require("./routers/propertiesRouter");
+const reviewsRouter = require("./routers/reviewsRouter")
 
 app.use(cors());
 app.use(express.static("public"));
@@ -21,6 +23,8 @@ app.get("/", (req, res) => {
 
 // routers
 app.use("/posts", postsRouter);
+app.use("/properties", propertiesRouter);
+app.use("/reviews", reviewsRouter);
 
 // handling errors and notFounds
 app.use(errorsHandler);
