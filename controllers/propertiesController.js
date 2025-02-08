@@ -5,9 +5,9 @@ const index = (req, res) => {
     const sql = "SELECT * FROM properties";
     // eseguiamo la query!
     connection.query(sql, (err, results) => {
-        console.log(results)
         if (err)
             return res.status(500).json({ error: "Database query failed" });
+
         res.json(results);
     });
 };
@@ -16,12 +16,12 @@ const show = (req, res) => {
     // recuperiamo l'id dall' URL
     const id = req.params.id;
     // prepariamo la query per il post
-    const postSql = ` 
+    const propertySql = ` 
         SELECT * FROM properties 
         WHERE id = ? 
     `;
     // eseguiamo la prima query per il post
-    connection.query(postSql, [id], (err, propertyResults) => {
+    connection.query(propertySql, [id], (err, propertyResults) => {
         if (err)
             return res.status(500).json({ error: "Database query failed" });
         if (propertyResults.length === 0)
@@ -38,10 +38,25 @@ const show = (req, res) => {
             if (likesResults.length === 0)
                 return res.status(404).json({ error: "post not found" });
 
-            // recuperiamo il post
-            const property = propertyResults[0];
-            property.total_likes = likesResults[0].total_likes;
-            res.json(property);
+            const imagesSql = `
+                SELECT * FROM property_images
+                WHERE property_id = ?
+            `;
+
+            connection.query(imagesSql, [id], (err, imagesResults) => {
+                if (err)
+                    return res
+                        .status(500)
+                        .json({ error: "Database query failed" });
+                if (imagesResults.length === 0)
+                    return res.status(404).json({ error: "post not found" });
+
+                // recuperiamo il post
+                const property = propertyResults[0];
+                property.total_likes = likesResults[0].total_likes;
+                property.img_endpoints = imagesResults.map((res) => res.url);
+                res.json(property);
+            });
         });
     });
 };
