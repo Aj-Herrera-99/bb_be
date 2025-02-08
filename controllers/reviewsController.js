@@ -12,7 +12,6 @@ const index = (req, res) => {
 };
 
 const show = (req, res) => {
-    // recuperiamo l'id dall' URL
     const id = req.params.id;
     // prepariamo la query per i tags del post con join
     const reviewsSql = `
