@@ -61,6 +61,76 @@ const show = (req, res) => {
     });
 };
 
+const store = (req, res) => {
+    const property = req.body
+    const {
+        user_id,
+        title,
+        description,
+        n_bedrooms,
+        n_bathrooms,
+        n_beds,
+        square_meters,
+        address,
+        address_number,
+        zipcode,
+        city,
+        property_type,
+    } = property;
+
+    if (
+        !title.length ||
+        !description.length ||
+        !address.length ||
+        !city.length ||
+        !property_type.length
+    ) {
+        return res.status(400).json({ success: false, message: "Bad Request" });
+    }
+
+
+    if (
+        (n_bedrooms <= 0,
+        n_bathrooms <= 0,
+        n_beds <= 0,
+        square_meters <= 0,
+        address_number <= 0,
+        zipcode <= 0)
+    ) {
+        return res.status(400).json({ success: false, message: "Bad Request" });
+    }
+
+    const sql = `
+                    INSERT INTO properties (user_id, title, description, n_bedrooms, n_bathrooms, n_beds, square_meters, address, address_number, zipcode, city,property_type)
+                    VALUES 
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                `;
+
+    connection.query(
+        sql,
+        [
+            user_id,
+            title,
+            description,
+            n_bedrooms,
+            n_bathrooms,
+            n_beds,
+            square_meters,
+            address,
+            address_number,
+            zipcode,
+            city,
+            property_type,
+        ],
+        (err, sqlResult) => {
+            if (err)
+                return res.status(500).json({ error: "Database query failed" });
+        }
+    );
+
+    res.status(201).json(property);
+};
+
 const destroy = (req, res) => {
     // recuperiamo l'id dall' URL
     const { id } = req.params;
@@ -72,4 +142,4 @@ const destroy = (req, res) => {
     });
 };
 
-module.exports = { index, destroy, show };
+module.exports = { index, destroy, show, store };

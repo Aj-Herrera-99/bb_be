@@ -29,6 +29,43 @@ const show = (req, res) => {
     });
 };
 
+const store = (req, res) => {
+    const review = req.body;
+    if (typeof review.property_id === "number") {
+        if (typeof review.title === "string" && review.title.length) {
+            if (
+                typeof review.description === "string" &&
+                review.description.length
+            ) {
+                const sql = `
+                    INSERT INTO reviews (user_id, property_id, title, description)
+                    VALUES 
+                    (?, ?, ?, ?);
+                `;
+
+                connection.query(
+                    sql,
+                    [
+                        null,
+                        review.property_id,
+                        review.title,
+                        review.description,
+                    ],
+                    (err, sqlResult) => {
+                        if (err)
+                            return res
+                                .status(500)
+                                .json({ error: "Database query failed" });
+                    }
+                );
+
+                return res.status(201).json(review);
+            }
+        }
+    }
+    res.status(400).json({ success: false, message: "Bad Request" });
+};
+
 const destroy = (req, res) => {
     // recuperiamo l'id dall' URL
     const { id } = req.params;
@@ -40,4 +77,4 @@ const destroy = (req, res) => {
     });
 };
 
-module.exports = { index, destroy, show };
+module.exports = { index, destroy, show, store };

@@ -11,9 +11,10 @@ const errorsHandler = require("./middlewares/errorsHandles");
 const notFound = require("./middlewares/notFound");
 const postsRouter = require("./routers/postsRouter");
 const propertiesRouter = require("./routers/propertiesRouter");
-const reviewsRouter = require("./routers/reviewsRouter")
+const reviewsRouter = require("./routers/reviewsRouter");
 
 app.use(cors());
+app.use(express.json());
 app.use(express.static("public"));
 
 // base url - homepage
