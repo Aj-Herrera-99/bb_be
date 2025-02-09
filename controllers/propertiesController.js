@@ -6,16 +6,20 @@ const index = (req, res) => {
         SELECT p.id, p.user_id, p.title, p.description, p.n_bedrooms,
         p.n_bathrooms, p.n_beds, p.square_meters, p.address,
         p.address_number, p.zipcode, p.city, p.property_type,
-        GROUP_CONCAT(pi.url) AS img_endpoints
+        GROUP_CONCAT(DISTINCT pi.url) AS img_endpoints,
+        COUNT(DISTINCT l.id) as total_likes
     FROM 
         properties AS p
     LEFT JOIN 
         property_images AS pi
     ON 
         p.id = pi.property_id
+    LEFT JOIN
+        likes AS l
+    ON
+        p.id = l.property_id
     GROUP BY 
         p.id;
-
     `;
 
     // eseguiamo la query!
