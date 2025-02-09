@@ -9,7 +9,6 @@ const port = process?.env.PORT || 3000;
 //Other imports
 const errorsHandler = require("./middlewares/errorsHandles");
 const notFound = require("./middlewares/notFound");
-const postsRouter = require("./routers/postsRouter");
 const propertiesRouter = require("./routers/propertiesRouter");
 const reviewsRouter = require("./routers/reviewsRouter");
 
@@ -23,7 +22,6 @@ app.get("/", (req, res) => {
 });
 
 // routers
-app.use("/posts", postsRouter);
 app.use("/properties", propertiesRouter);
 app.use("/reviews", reviewsRouter);
 
