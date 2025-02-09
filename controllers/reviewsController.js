@@ -32,22 +32,27 @@ const show = (req, res) => {
 
 const store = (req, res) => {
     const review = req.body;
-    if (!review)
-        res.status(400).json({ success: false, message: "Bad Request" });
 
-    // validazione campi della new review
+    // Controlla se il body è vuoto
+    if (!review) {
+        return res.status(400).json({ success: false, message: "Bad Request" });
+    }
+    console.log(review);
+
+    // Validazione dei campi della review
     if (
-        typeof review.property_id === "number" &&
+        !isNaN(review.property_id) &&
         typeof review.title === "string" &&
-        review.title.length &&
+        review.title.length > 0 &&
         typeof review.description === "string" &&
-        review.description.length
+        review.description.length > 0
     ) {
-        // prepariamo la query per l'add di una nuova review
+        console.log("Validazione passata");
+
+        // Prepariamo la query per l'aggiunta di una nuova review
         const sql = `
             INSERT INTO reviews (user_id, property_id, title, description)
-            VALUES 
-            (?, ?, ?, ?);
+            VALUES (?, ?, ?, ?);
         `;
 
         connection.query(
@@ -59,26 +64,40 @@ const store = (req, res) => {
                 review.description,
             ],
             (err, sqlResult) => {
-                if (err)
-                    return res
-                        .status(500)
-                        .json({ error: "Database query failed" });
+                if (err) {
+                    // Risposta in caso di errore nella query
+                    console.error(err);
+                    return res.status(500).json({
+                        success: false,
+                        message: "Database query failed",
+                    });
+                }
+
+                // Risposta in caso di successo
                 return res.status(201).json(review);
             }
         );
+
+        // Fermiamo l'esecuzione qui dopo aver avviato la query asincrona
+        return;
     }
-    res.status(400).json({ success: false, message: "Bad Request" });
+
+    // Risposta in caso di validazione fallita
+    return res.status(400).json({
+        success: false,
+        message: "Bad Request: Validazione fallita",
+    });
 };
 
 const destroy = (req, res) => {
-    // // recuperiamo l'id dall' URL
-    // const { id } = req.params;
-    // //Eliminiamo il post dal blog
-    // connection.query("DELETE FROM posts WHERE id = ?", [id], (err) => {
-    //     if (err)
-    //         return res.status(500).json({ error: "Failed to delete post" });
-    //     res.sendStatus(204);
-    // });
+    // recuperiamo l'id dall' URL
+    const { id } = req.params;
+    //Eliminiamo il post dal blog
+    connection.query("DELETE FROM reviews WHERE id = ?", [id], (err) => {
+        if (err)
+            return res.status(500).json({ error: "Failed to delete post" });
+        res.sendStatus(204);
+    });
 };
 
 module.exports = { index, destroy, show, store };
