@@ -90,6 +90,12 @@ const show = (req, res) => {
 };
 
 const store = (req, res) => {
+     if (!req.body) return;
+     if (!req.file) return;
+     let filePath = req.file.path.replaceAll(`\\`, "/");
+     filePath = filePath.replace("public", "");
+     console.log(filePath);
+     res.status(201).json({path: filePath})
     const property = req.body;
     if (!property)
         res.status(400).json({ success: false, message: "Bad Request" });
