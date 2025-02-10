@@ -90,12 +90,12 @@ const show = (req, res) => {
 };
 
 const store = (req, res) => {
-     if (!req.body) return;
-     if (!req.file) return;
-     let filePath = req.file.path.replaceAll(`\\`, "/");
-     filePath = filePath.replace("public", "");
-     console.log(filePath);
-     res.status(201).json({path: filePath})
+    if (!req.body) return;
+    if (!req.file) return;
+    let filePath = req.file.path.replaceAll(`\\`, "/");
+    filePath = filePath.replace("public", "");
+    console.log(filePath);
+    res.status(201).json({ path: filePath });
     const property = req.body;
     if (!property)
         res.status(400).json({ success: false, message: "Bad Request" });
@@ -138,13 +138,13 @@ const store = (req, res) => {
     }
 
     // prepariamo la query per l' add di una nuova property
-    const sql = `
+    const propertySql = `
         INSERT INTO properties (user_id, title, description, n_bedrooms, n_bathrooms, n_beds, square_meters, address, address_number, zipcode, city,property_type)
         VALUES 
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `;
     connection.query(
-        sql,
+        propertySql,
         [
             user_id,
             title,
@@ -159,10 +159,26 @@ const store = (req, res) => {
             city,
             property_type,
         ],
-        (err, sqlResult) => {
+        (err, propertyResult) => {
             if (err)
                 return res.status(500).json({ error: "Database query failed" });
-            res.status(201).json(property);
+            // prova
+            const { id } = propertyResult[0];
+            const propImageSql = `
+                INSERT INTO property_images(property_id, url)
+                VALUES (?, ?);
+            `;
+            connection.query(
+                propImageSql,
+                [id, filePath],
+                (err, imageResult) => {
+                    if (err)
+                        return res
+                            .status(500)
+                            .json({ error: "Database query failed" });
+                    res.status(201).json(property);
+                }
+            );
         }
     );
 };
