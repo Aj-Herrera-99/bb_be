@@ -90,15 +90,14 @@ const show = (req, res) => {
 };
 
 const store = (req, res) => {
-    if (!req.body) return;
-    if (!req.file) return;
+    if (!req.body || !req.file)
+        return res.status(400).json({ success: false, message: "Bad Request" });
+
     let filePath = req.file.path.replaceAll(`\\`, "/");
     filePath = filePath.replace("public", "");
     console.log(filePath);
     res.status(201).json({ path: filePath });
     const property = req.body;
-    if (!property)
-        res.status(400).json({ success: false, message: "Bad Request" });
 
     // Destrutturazione new property
     const {
@@ -181,6 +180,7 @@ const store = (req, res) => {
             );
         }
     );
+    return;
 };
 
 const destroy = (req, res) => {
