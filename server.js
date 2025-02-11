@@ -22,8 +22,8 @@ app.get("/", (req, res) => {
 });
 
 // routers
-app.use("/properties", propertiesRouter);
-app.use("/reviews", reviewsRouter);
+app.use("/api/properties", propertiesRouter);
+app.use("/api/reviews", reviewsRouter);
 
 // handling errors and notFounds
 app.use(errorsHandler);
