@@ -15,8 +15,13 @@ const sendEmail = async (req, res, next) => {
     try {
         const { propertyId, userMail, subject, text } = req.body;
         
-        // Get IP address - handles both proxy and direct connections
-        const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
+        // Get IP address handles proxy and direct connections
+        let ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
+        
+        // For localhost testing
+        if (ip === '::1') {
+            ip = '127.0.0.1';
+        }
 
         // Check if IP exists and last contact time
         const checkIpSql = `
@@ -32,8 +37,9 @@ const sendEmail = async (req, res, next) => {
         if (ipResult.length > 0) {
             const lastDateTime = new Date(ipResult[0].datetime);
             const now = new Date();
+            console.log(lastDateTime, now);
             const hoursDiff = (now - lastDateTime) / (1000 * 60 * 60); // Convert to hours
-
+            console.log(hoursDiff);
             if (hoursDiff < 24) {
                 throw new CustomError("Please wait 24 hours before sending another email", 429);
             }
@@ -46,6 +52,7 @@ const sendEmail = async (req, res, next) => {
             `;
             await connection.promise().query(updateTimeSql, [ipResult[0].id]);
         } else {
+
             // Insert new contact record if IP not found
             const insertContactSql = `
                 INSERT INTO contacts (property_id, contact_ip, datetime)
@@ -54,7 +61,7 @@ const sendEmail = async (req, res, next) => {
             await connection.promise().query(insertContactSql, [propertyId, ip]);
         }
 
-        // Validate fields
+        // Validate
         if (!propertyId || !subject || !userMail || !text) {
             throw new CustomError("Missing required fields", 400);
         }
@@ -97,4 +104,4 @@ const sendEmail = async (req, res, next) => {
     }
 };
 
-module.exports = { sendEmail }; 
+module.exports = { sendEmail };
