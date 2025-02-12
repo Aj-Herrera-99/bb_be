@@ -6,8 +6,7 @@ const index = (req, res) => {
     // prepariamo la query
     const sql = `
         SELECT p.id, p.user_id, p.title, p.description, p.n_bedrooms,
-        p.n_bathrooms, p.n_beds, p.square_meters, p.address,
-        p.address_number, p.zipcode, p.city, p.property_type,
+        p.n_bathrooms, p.n_beds, p.square_meters, p.address, p.zipcode, p.city, p.property_type,
         GROUP_CONCAT(DISTINCT pi.url ORDER BY pi.id ASC) AS img_endpoints,
         COUNT(DISTINCT l.id) as total_likes
     FROM 
