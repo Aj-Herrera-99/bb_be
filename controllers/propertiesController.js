@@ -1,4 +1,6 @@
+const path = require("path");
 const connection = require("../data/db");
+const fs = require("fs");
 
 const index = (req, res) => {
     // prepariamo la query
@@ -90,13 +92,10 @@ const show = (req, res) => {
 };
 
 const store = (req, res) => {
-  if (!req.body || !req.file)
-    return res.status(400).json({ success: false, message: "Bad Request" });
-  
-    let filePath = req.file.path.replaceAll(`\\`, "/");
-    filePath = filePath.replace("public", "");
+    if (!req.body)
+        return res.status(400).json({ success: false, message: "Bad Request" });
+
     const property = req.body;
-    console.log(property)
 
     // Destrutturazione new property
     const {
@@ -115,25 +114,16 @@ const store = (req, res) => {
     } = property;
 
     // Validazione campi della new property
-    // if (
-    //     !title.length ||
-    //     !description.length ||
-    //     !address.length ||
-    //     !city.length ||
-    //     !property_type.length
-    // ) {
-    //     return res.status(400).json({ success: false, message: "Bad Request" });
-    // }
-    // if (
-    //     (n_bedrooms <= 0,
-    //     n_bathrooms <= 0,
-    //     n_beds <= 0,
-    //     square_meters <= 0,
-    //     address_number <= 0,
-    //     zipcode <= 0)
-    // ) {
-    //     return res.status(400).json({ success: false, message: "Bad Request" });
-    // }
+    if (
+        n_bedrooms <= 0 ||
+        n_bathrooms <= 0 ||
+        n_beds <= 0 ||
+        square_meters <= 0 ||
+        address_number < 0 ||
+        zipcode < 0
+    ) {
+        return res.status(400).json({ success: false, message: "Bad Request" });
+    }
 
     // prepariamo la query per l'add di una nuova property
     const propertySql = `
@@ -144,7 +134,7 @@ const store = (req, res) => {
     connection.query(
         propertySql,
         [
-            null,
+            user_id,
             title,
             description,
             n_bedrooms,
@@ -157,33 +147,66 @@ const store = (req, res) => {
             city,
             property_type,
         ],
-        (err) => {
-            if (err)
+        (err, _res) => {
+            if (err) {
                 return res
                     .status(500)
                     .json({ error: "Database query failed 1" });
+            }
+            // mi salvo la root
+            const rootPath = path.resolve(__dirname, "..");
+            let filePath, oldPath;
+            if (req.file) {
+                filePath = req.file.path.replaceAll(`\\`, "/");
+                // oldPath contiene il percorso default (./uploads/...)
+                oldPath = path.join(rootPath, filePath);
+                filePath = filePath.replace("public/uploads", "");
+            }
+            // fermati se non ce upload di immagine
+            if (!filePath) return res.status(201).json(property);
 
             // ricaviamo l'ultima proprieta creata
             const propertySql = `SELECT * 
-              FROM properties
-              ORDER BY id DESC
-              LIMIT 1;
-            `;
+                FROM properties
+                ORDER BY id DESC
+                LIMIT 1;
+                `;
             connection.query(propertySql, (err, result) => {
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({ error: "Database query failed 1" });
+                }
+                if (result.length === 0) {
+                    return res
+                        .status(500)
+                        .json({ error: "Property not found" });
+                }
                 // dall'ultima proprieta creata, mi ricavo l'id
                 const { id } = result[0];
                 // preparo la query per salvare la nuova url in corrispondenza dell'id della proprieta
                 const propImageSql = `
-                  INSERT INTO property_images(property_id, url)
-                  VALUES (?, ?);
-                `;
+                        INSERT INTO property_images(property_id, url)
+                        VALUES (?, ?);
+                    `;
                 connection.query(propImageSql, [id, filePath], (err) => {
                     if (err) {
                         return res
                             .status(500)
                             .json({ error: "Database query failed" });
                     }
-                    return res.status(201).json(property);
+                    // la newPath ha l'id come sottocartella corrispondente
+                    const newPath = path.join(
+                        rootPath,
+                        "public",
+                        "images",
+                        id.toString(),
+                        filePath
+                    );
+                    console.log(newPath);
+                    // funzione che mi sposta i file in modo asincrono
+                    moveFileAsync(oldPath, newPath);
+                    return res.status(201).json(result[0]);
                 });
             });
         }
@@ -201,5 +224,22 @@ const destroy = (req, res) => {
         res.sendStatus(204);
     });
 };
+
+function moveFileAsync(oldPath, newPath) {
+    fs.mkdir(path.dirname(newPath), { recursive: true }, (err) => {
+        if (err) {
+            console.error("Errore nella creazione della cartella:", err);
+            return;
+        }
+
+        fs.rename(oldPath, newPath, (err) => {
+            if (err) {
+                console.error("Errore nello spostamento del file:", err);
+            } else {
+                console.log("File spostato con successo!");
+            }
+        });
+    });
+}
 
 module.exports = { index, destroy, show, store };
