@@ -37,9 +37,8 @@ const sendEmail = async (req, res, next) => {
         if (ipResult.length > 0) {
             const lastDateTime = new Date(ipResult[0].datetime);
             const now = new Date();
-            console.log(lastDateTime, now);
             const hoursDiff = (now - lastDateTime) / (1000 * 60 * 60); // Convert to hours
-            console.log(hoursDiff);
+
             if (hoursDiff < 24) {
                 throw new CustomError("Please wait 24 hours before sending another email", 429);
             }
