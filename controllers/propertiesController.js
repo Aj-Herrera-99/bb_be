@@ -107,27 +107,54 @@ const store = (req, res) => {
         n_beds,
         square_meters,
         address,
-        address_number,
         zipcode,
         city,
         property_type,
     } = property;
 
     // Validazione campi della new property
-    if (
-        n_bedrooms <= 0 ||
-        n_bathrooms <= 0 ||
-        n_beds <= 0 ||
-        square_meters <= 0 ||
-        address_number < 0 ||
-        zipcode < 0
-    ) {
-        return res.status(400).json({ success: false, message: "Bad Request" });
+    if(!title.trim().length){
+        return res.status(400).json({
+            success: false,
+            message: "Il titolo dell'inserzione non può essere vuoto!",
+        });
     }
+    if (n_bedrooms <= 0)
+        return res
+            .status(400)
+            .json({
+                success: false,
+                message:
+                    "Il numero delle camere da letto non può essere negativo!",
+            });
+    if (n_bathrooms <= 0)
+        return res
+            .status(400)
+            .json({
+                success: false,
+                message:
+                    "Il numero dei bagni non può essere negativo!",
+            });
+    if (n_beds <= 0)
+        return res
+            .status(400)
+            .json({
+                success: false,
+                message:
+                    "Il numero dei letti non può essere negativo!",
+            });
+    if (square_meters <= 0)
+        return res
+            .status(400)
+            .json({
+                success: false,
+                message:
+                    "La metratura non può essere negativa!",
+            });
 
     // prepariamo la query per l'add di una nuova property
     const propertySql = `
-        INSERT INTO properties (user_id, title, description, n_bedrooms, n_bathrooms, n_beds, square_meters, address, address_number, zipcode, city,property_type)
+        INSERT INTO properties (user_id, title, description, n_bedrooms, n_bathrooms, n_beds, square_meters, address, zipcode, city,property_type)
         VALUES 
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `;
