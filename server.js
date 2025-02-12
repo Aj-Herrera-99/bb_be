@@ -11,6 +11,7 @@ const errorsHandler = require("./middlewares/errorsHandles");
 const notFound = require("./middlewares/notFound");
 const propertiesRouter = require("./routers/propertiesRouter");
 const reviewsRouter = require("./routers/reviewsRouter");
+const emailRouter = require("./routers/emailRouter");
 
 app.use(cors());
 app.use(express.json());
@@ -24,7 +25,7 @@ app.get("/", (req, res) => {
 // routers
 app.use("/api/properties", propertiesRouter);
 app.use("/api/reviews", reviewsRouter);
-
+app.use("/api/email", emailRouter);
 // handling errors and notFounds
 app.use(errorsHandler);
 app.use(notFound);
