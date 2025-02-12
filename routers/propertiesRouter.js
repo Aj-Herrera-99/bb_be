@@ -17,7 +17,7 @@ const index = require("../controllers/propertiesController/index");
 const show = require("../controllers/propertiesController/show");
 const store = require("../controllers/propertiesController/store");
 const storeImage = require("../controllers/propertiesController/storeImage");
-const destroy = require("../controllers/propertiesController");
+const destroy = require("../controllers/propertiesController/destroy");
 
 // index
 router.get("/", index);

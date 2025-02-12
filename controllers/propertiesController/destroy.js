@@ -1,5 +1,5 @@
-const connection = require("../data/db");
-const { deletePropertyQuery } = require("../sql/queries");
+const connection = require("../../data/db");
+const { deletePropertyQuery } = require("../../sql/queries");
 
 const destroy = (req, res) => {
     // recuperiamo l'id dall' URL
