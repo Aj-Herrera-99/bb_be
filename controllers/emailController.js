@@ -14,6 +14,45 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async (req, res, next) => {
     try {
         const { propertyId, userMail, subject, text } = req.body;
+        
+        // Get IP address - handles both proxy and direct connections
+        const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
+
+        // Check if IP exists and last contact time
+        const checkIpSql = `
+            SELECT id, datetime 
+            FROM contacts 
+            WHERE contact_ip = ? AND property_id = ?
+            ORDER BY datetime DESC 
+            LIMIT 1
+        `;
+
+        const [ipResult] = await connection.promise().query(checkIpSql, [ip, propertyId]);
+
+        if (ipResult.length > 0) {
+            const lastDateTime = new Date(ipResult[0].datetime);
+            const now = new Date();
+            const hoursDiff = (now - lastDateTime) / (1000 * 60 * 60); // Convert to hours
+
+            if (hoursDiff < 24) {
+                throw new CustomError("Please wait 24 hours before sending another email", 429);
+            }
+
+            // Update record if more than 24 hours
+            const updateTimeSql = `
+                UPDATE contacts 
+                SET datetime = NOW()
+                WHERE id = ?
+            `;
+            await connection.promise().query(updateTimeSql, [ipResult[0].id]);
+        } else {
+            // Insert new contact record if IP not found
+            const insertContactSql = `
+                INSERT INTO contacts (property_id, contact_ip, datetime)
+                VALUES (?, ?, NOW())
+            `;
+            await connection.promise().query(insertContactSql, [propertyId, ip]);
+        }
 
         // Validate fields
         if (!propertyId || !subject || !userMail || !text) {

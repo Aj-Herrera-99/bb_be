@@ -3,6 +3,9 @@ const cors = require("cors");
 // create a server instance
 const app = express();
 
+// trusted proxy for email controller
+app.set('trust proxy', true);
+
 // set costant to port
 const port = process?.env.PORT || 3000;
 
