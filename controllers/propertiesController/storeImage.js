@@ -27,7 +27,7 @@ const storeImage = (req, res) => {
                 .json({ success: true, message: "Property created without images" });
         }
 
-        console.log("Starting to process", files.length, "files");
+        console.log("Starting n.", files.length, "files");
         let processedFiles = 0;
 
         files.forEach((file, index) => {
@@ -41,7 +41,7 @@ const storeImage = (req, res) => {
                     return res.status(500).json({ error: "Failed to store image reference" });
                 }
 
-                // Fix path resolution by going up from controllers/propertiesController to project root
+                // path finder
                 const rootPath = path.resolve(__dirname, "../../");
                 const oldPath = path.join(rootPath, "public", "uploads", file.originalname);
                 const newPath = path.join(
