@@ -44,6 +44,33 @@ const storePropertyStoreImg = `INSERT INTO property_images(property_id, url) VAL
 
 const deletePropertyQuery = "DELETE FROM properties WHERE id = ?";
 
+// Email related queries
+const checkIpContactQuery = `
+    SELECT id, datetime 
+    FROM contacts 
+    WHERE contact_ip = ? AND property_id = ?
+    ORDER BY datetime DESC 
+    LIMIT 1
+`;
+
+const updateContactTimeQuery = `
+    UPDATE contacts 
+    SET datetime = NOW()
+    WHERE id = ?
+`;
+
+const insertContactQuery = `
+    INSERT INTO contacts (property_id, contact_ip, datetime)
+    VALUES (?, ?, NOW())
+`;
+
+const getHostEmailQuery = `
+    SELECT users.email 
+    FROM users 
+    JOIN properties ON properties.user_id = users.id 
+    WHERE properties.id = ?
+`;
+
 module.exports = {
     indexPropertyQuery,
     showPropertyQuery,
@@ -53,4 +80,9 @@ module.exports = {
     storePropertyShowLastProperty,
     storePropertyStoreImg,
     deletePropertyQuery,
+    // Add new email queries
+    checkIpContactQuery,
+    updateContactTimeQuery,
+    insertContactQuery,
+    getHostEmailQuery,
 };
