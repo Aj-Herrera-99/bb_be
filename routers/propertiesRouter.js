@@ -25,8 +25,8 @@ router.get("/", index);
 // show
 router.get("/:id", show);
 
-// store
-router.post("/", upload.single("file"), store, storeImage);
+// store multi images
+router.post("/", upload.array('files', 7), store, storeImage);
 
 // destroy
 router.delete("/:id", destroy);

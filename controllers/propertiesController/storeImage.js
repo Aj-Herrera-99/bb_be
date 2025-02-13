@@ -1,45 +1,73 @@
 const path = require("path");
 const connection = require("../../data/db");
+const { moveFileAsync } = require("../../utils/utils");
 const {
     storePropertyShowLastProperty,
     storePropertyStoreImg,
 } = require("../../sql/queries");
 
+
 const storeImage = (req, res) => {
-    // prima query: ricavo l'ultima proprieta creata
+    console.log("StoreImage");
+    
     connection.query(storePropertyShowLastProperty, (err, result) => {
         if (err || result.length === 0) {
+            console.error("Database query error:", err);
             return res
                 .status(500)
                 .json({ error: "Property not found or database query failed" });
         }
-        // ricavo l'id dell'ultima proprieta creata
+
         const { id } = result[0];
-        // ricavo il nome del file da req.file.path
-        let fileEndpoint = req.file.path
-            .replaceAll("\\", "/")
-            .replace("public/uploads", "");
-        // seconda query: image store in property_images
-        connection.query(storePropertyStoreImg, [id, fileEndpoint], (err) => {
-            if (err) {
-                return res.status(500).json({ error: "Database query failed" });
-            }
-            // creo una var che contiene la root directory
-            const rootPath = path.resolve(__dirname, "..");
-            // ricavo la path originale del file
-            const oldPath = path.join(rootPath, req.file.path);
-            // creo la nuova path per il file dentro images in corrispondenza dell'id
-            const newPath = path.join(
-                rootPath,
-                "public",
-                "images",
-                id.toString(),
-                fileEndpoint
-            );
-            // funzione asincrona che mi sposta i file
-            moveFileAsync(oldPath, newPath);
-            // risposta con successo
-            return res.status(201).json(result[0]);
+        const files = req.files;
+
+        if (!files || files.length === 0) {
+            return res
+                .status(201)
+                .json({ success: true, message: "Property created without images" });
+        }
+
+        console.log("Starting to process", files.length, "files");
+        let processedFiles = 0;
+
+        files.forEach((file, index) => {
+            let fileEndpoint = file.path
+                .replaceAll("\\", "/")
+                .replace("public/uploads", "");
+
+            connection.query(storePropertyStoreImg, [id, fileEndpoint], (err) => {
+                if (err) {
+                    console.error("Error storing image reference:", err);
+                    return res.status(500).json({ error: "Failed to store image reference" });
+                }
+
+                // Fix path resolution by going up from controllers/propertiesController to project root
+                const rootPath = path.resolve(__dirname, "../../");
+                const oldPath = path.join(rootPath, "public", "uploads", file.originalname);
+                const newPath = path.join(
+                    rootPath,
+                    "public",
+                    "images",
+                    id.toString(),
+                    file.originalname
+                );
+
+                console.log("Moving file from:", oldPath);
+                console.log("Moving file to:", newPath);
+
+                moveFileAsync(oldPath, newPath);
+                
+                processedFiles++;
+                
+                if (processedFiles === files.length) {
+                    console.log("All files processed successfully");
+                    return res.status(201).json({
+                        success: true,
+                        message: "Property and images created successfully",
+                        property: result[0]
+                    });
+                }
+            });
         });
     });
 };

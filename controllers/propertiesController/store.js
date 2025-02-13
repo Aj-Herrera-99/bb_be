@@ -17,6 +17,7 @@ let defaultPropertyStoredObj = {
 };
 
 const store = (req, res, next) => {
+    console.log("Store middleware started");
     if (!req.body) {
         return res.status(400).json({ success: false, message: "Bad Request" });
     }
@@ -43,13 +44,15 @@ const store = (req, res, next) => {
         if (err) {
             return res.status(500).json({ error: "Database query failed" });
         }
-        // entra qui se non ce stato upload di file immagine
-        if (!req.file) {
+        console.log("Store middleware - DB query completed");
+        // Check if we have files
+        if (!req.files || req.files.length === 0) {
+            console.log("No files found in request");
             return res
                 .status(201)
                 .json({ success: true, message: "Property created" });
         }
-        // prossimo middleware: storeImage
+        console.log("Calling next middleware (storeImage)");
         next();
     });
 };
