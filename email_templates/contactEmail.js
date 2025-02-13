@@ -1,4 +1,4 @@
-const htmlContactEmail = (userMail, hostEmail, text, subject) => `
+const htmlContactEmail = (userMail, hostEmail, text, name) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,8 +37,8 @@ const htmlContactEmail = (userMail, hostEmail, text, subject) => `
                     <!-- Message Box -->
                     <tr>
                         <td style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
-                            <p style="font-size: 16px; color: #333;"><strong>Subject:</strong> ${subject}</p>
-                            <p style="font-size: 14px; color: #555; line-height: 1.5;">${text.replace(/\n/g, '<br>')}</p>
+                            <p style="font-size: 24px; color: #333;"><strong>Subject:</strong>Ti ha contattato ${name} da Bool B&B</p>
+                            <p style="font-size: 19px; color: #555; line-height: 1.5;">${text.replace(/\n/g, '<br>')}</p>
                         </td>
                     </tr>
                     

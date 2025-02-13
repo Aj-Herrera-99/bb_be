@@ -20,7 +20,8 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async (req, res, next) => {
     try {
-        const { propertyId, userMail, subject, text } = req.body;
+        
+        const { propertyId, userMail, text, name } = req.body;
         
         // Get IP address handles proxy and direct connections
         let ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
@@ -50,7 +51,7 @@ const sendEmail = async (req, res, next) => {
         }
 
         // Validate
-        if (!propertyId || !subject || !userMail || !text) {
+        if (!propertyId || !userMail || !text || !name) {
             throw new CustomError("Missing required fields", 400);
         }
 
@@ -64,14 +65,14 @@ const sendEmail = async (req, res, next) => {
         const hostEmail = result[0].email;
 
         // Create HTML template
-        const htmlContent = htmlContactEmail(userMail, hostEmail, text, subject);
+        const htmlContent = htmlContactEmail(userMail, hostEmail, text, name);
 
         // Email options with HTML
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: hostEmail,
             cc: userMail,
-            subject: subject,
+            subject: "Ti hanno contattato da Bool B&B",
             text: text, // Fallback
             html: htmlContent // Add HTML content
         };
