@@ -31,6 +31,7 @@ function validateProperty(propertyObj) {
         city,
         property_type,
     } = propertyObj;
+    console.log(property_type)
     const errors = [];
     if (!title || !title.trim().length)
         errors.push("Il titolo dell'inserzione non può essere vuoto!");
