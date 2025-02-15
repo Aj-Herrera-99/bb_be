@@ -10,6 +10,15 @@ const indexPropertiesQuery = (p) => {
         conditions.push("LOWER(p.property_type) LIKE ?");
     if (p.city && p.city !== "%") conditions.push("LOWER(p.city) LIKE ?");
 
+    // paginazione
+    const dataPerPage = 6;
+    let pagination = "";
+    if (p.page > 0) {
+        pagination = `LIMIT ${dataPerPage} OFFSET ${
+            p.page * dataPerPage - dataPerPage
+        }`;
+    }
+
     // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
     const whereClause = conditions.length
         ? `WHERE ${conditions.join(" AND ")}`
@@ -28,7 +37,7 @@ const indexPropertiesQuery = (p) => {
             ON p.id = l.property_id
         ${whereClause}
         GROUP BY p.id
-        ORDER BY total_likes DESC
+        ${pagination}
     `;
 };
 
