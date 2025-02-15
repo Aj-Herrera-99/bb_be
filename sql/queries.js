@@ -27,7 +27,8 @@ const indexPropertiesQuery = (p) => {
         LEFT JOIN likes AS l
             ON p.id = l.property_id
         ${whereClause}
-        GROUP BY p.id;
+        GROUP BY p.id
+        ORDER BY total_likes DESC
     `;
 };
 
