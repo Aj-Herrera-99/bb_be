@@ -13,10 +13,12 @@ const indexPropertiesQuery = (p) => {
     // paginazione
     const dataPerPage = 6;
     let pagination = "";
-    if (p.page > 0) {
+    if (p?.page && p.page > 0) {
         pagination = `LIMIT ${dataPerPage} OFFSET ${
             p.page * dataPerPage - dataPerPage
         }`;
+    } else {
+        pagination = `LIMIT ${dataPerPage} OFFSET 0`;
     }
 
     // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
