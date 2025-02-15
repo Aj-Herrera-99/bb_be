@@ -11,14 +11,14 @@ const indexPropertiesQuery = (p) => {
     if (p.city && p.city !== "%") conditions.push("LOWER(p.city) LIKE ?");
 
     // paginazione
-    const dataPerPage = 6;
+    const resultsPerPage = 4;
     let pagination = "";
     if (p?.page && p.page > 0) {
-        pagination = `LIMIT ${dataPerPage} OFFSET ${
-            p.page * dataPerPage - dataPerPage
+        pagination = `LIMIT ${resultsPerPage} OFFSET ${
+            p.page * resultsPerPage - resultsPerPage
         }`;
     } else {
-        pagination = `LIMIT ${dataPerPage} OFFSET 0`;
+        pagination = `LIMIT ${resultsPerPage} OFFSET 0`;
     }
 
     // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
