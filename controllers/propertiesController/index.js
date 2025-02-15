@@ -1,43 +1,46 @@
 const connection = require("../../data/db");
-const { indexPropertyQuery } = require("../../sql/queries");
+const { indexPropertiesQuery } = require("../../sql/queries");
 
 const defaultPropertyObj = {
-    n_bedrooms: null,
-    n_bathrooms: null,
-    n_beds: null,
-    square_meters: null,
+    n_bedrooms: 0,
+    n_bathrooms: 0,
+    n_beds: 0,
+    square_meters: 0,
+    property_type: "",
+    city: "",
 };
 
 const index = (req, res) => {
     // spread query params con propertyObj (valori default)
-    const propertyObj = { ...defaultPropertyObj, ...req.query };
-    // creo un array a partire dai values di propertyObj
-    const propertyArray = Object.values(propertyObj).map((val) => val);
-    // per i valori null converti in 0, per gli altri gli fai un parseInt
-    for (let i = 0; i < propertyArray.length; i++) {
-        if (propertyArray[i] !== null) {
-            propertyArray[i] = parseInt(propertyArray[i]);
-        } else {
-            propertyArray[i] = 0;
-        }
-    }
-    // query: properties (con filtro)
-    connection.query(indexPropertyQuery, propertyArray, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: "Database query failed" });
-        }
+    let propertyObj = { ...defaultPropertyObj, ...req.query };
 
-        results.forEach((result) => {
-            const imgEndpoints = result.img_endpoints?.split(",");
-            if (imgEndpoints) {
-                result.img_endpoints = imgEndpoints;
-            } else {
-                result.img_endpoints = [];
-            }
-        });
-        // risposta con successo
-        res.json(results);
+    console.log(propertyObj)
+    // creo un array fitrato senza valori falsy a partire dai values di propertyObj
+    const propertyArray = Object.values(propertyObj).filter((val) => {
+        if (!isNaN(val) && val > 0) return true;
+        if (val && typeof val === "string") return true;
     });
+    // query: properties (con filtro)
+    connection.query(
+        indexPropertiesQuery(propertyObj),
+        propertyArray,
+        (err, results) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ error: "Database query failed" });
+            }
+            results.forEach((result) => {
+                const imgEndpoints = result.img_endpoints?.split(",");
+                if (imgEndpoints) {
+                    result.img_endpoints = imgEndpoints;
+                } else {
+                    result.img_endpoints = [];
+                }
+            });
+            // risposta con successo
+            res.json(results);
+        }
+    );
 };
 
 module.exports = index;

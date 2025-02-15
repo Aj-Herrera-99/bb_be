@@ -1,20 +1,34 @@
-const indexPropertyQuery = `
-    SELECT p.id, p.user_id, p.title, p.description, p.n_bedrooms,
-        p.n_bathrooms, p.n_beds, p.square_meters, p.address, p.zipcode,
-        p.city, p.property_type,
-        GROUP_CONCAT(DISTINCT pi.url ORDER BY pi.id ASC) AS img_endpoints,
-        COUNT(DISTINCT l.id) as total_likes
-    FROM properties AS p
-    LEFT JOIN property_images AS pi
-        ON p.id = pi.property_id
-    LEFT JOIN likes AS l
-        ON p.id = l.property_id
-    WHERE p.n_bedrooms >= ?
-        AND p.n_bathrooms >= ?
-        AND p.n_beds >= ?
-        AND p.square_meters >= ?
-    GROUP BY p.id;
-`;
+const indexPropertiesQuery = (p) => {
+    // Creoun array di condizioni valide
+    const conditions = [];
+
+    if (p.n_bedrooms > 0) conditions.push("p.n_bedrooms >= ?");
+    if (p.n_bathrooms > 0) conditions.push("p.n_bathrooms >= ?");
+    if (p.n_beds > 0) conditions.push("p.n_beds >= ?");
+    if (p.square_meters > 0) conditions.push("p.square_meters >= ?");
+    if (p.property_type) conditions.push("LOWER(p.property_type) = ?");
+    if (p.city) conditions.push("LOWER(p.city) = ?");
+
+    // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
+    const whereClause = conditions.length
+        ? `WHERE ${conditions.join(" AND ")}`
+        : "";
+
+    return `
+        SELECT p.id, p.user_id, p.title, p.description, p.n_bedrooms,
+            p.n_bathrooms, p.n_beds, p.square_meters, p.address, p.zipcode,
+            p.city, p.property_type,
+            GROUP_CONCAT(DISTINCT pi.url ORDER BY pi.id ASC) AS img_endpoints,
+            COUNT(DISTINCT l.id) as total_likes
+        FROM properties AS p
+        LEFT JOIN property_images AS pi
+            ON p.id = pi.property_id
+        LEFT JOIN likes AS l
+            ON p.id = l.property_id
+        ${whereClause}
+        GROUP BY p.id;
+    `;
+};
 
 const showPropertyQuery = ` 
     SELECT * FROM properties 
@@ -72,7 +86,7 @@ const getHostEmailQuery = `
 `;
 
 module.exports = {
-    indexPropertyQuery,
+    indexPropertiesQuery,
     showPropertyQuery,
     showPropertyLikesQuery,
     showPropertyImagesQuery,
