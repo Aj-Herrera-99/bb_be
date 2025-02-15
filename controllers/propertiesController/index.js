@@ -13,8 +13,12 @@ const defaultPropertyObj = {
 const index = (req, res) => {
     // spread query params con propertyObj (valori default)
     let propertyObj = { ...defaultPropertyObj, ...req.query };
+    propertyObj = {
+        ...propertyObj,
+        property_type: propertyObj.property_type + "%",
+        city: propertyObj.city + "%",
+    };
 
-    console.log(propertyObj)
     // creo un array fitrato senza valori falsy a partire dai values di propertyObj
     const propertyArray = Object.values(propertyObj).filter((val) => {
         if (!isNaN(val) && val > 0) return true;
