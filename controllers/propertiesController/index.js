@@ -15,15 +15,23 @@ const index = (req, res) => {
     let propertyObj = { ...defaultPropertyObj, ...req.query };
     propertyObj = {
         ...propertyObj,
-        property_type: propertyObj.property_type + "%",
-        city: propertyObj.city + "%",
+        property_type: propertyObj.property_type.length
+            ? propertyObj.property_type.trim() + "%"
+            : "",
+        city: propertyObj.city.length ? propertyObj.city.trim() + "%" : "",
     };
 
     // creo un array fitrato senza valori falsy a partire dai values di propertyObj
     const propertyArray = Object.values(propertyObj).filter((val) => {
-        if (!isNaN(val) && val > 0) return true;
-        if (val && typeof val === "string") return true;
+        if (!isNaN(val) && Number(val) > 0) {
+            return true;
+        }
+        if (typeof val === "string" && val.length && val !== "0") {
+            return true;
+        }
+        return false;
     });
+    console.log(propertyArray);
     // query: properties (con filtro)
     connection.query(
         indexPropertiesQuery(propertyObj),

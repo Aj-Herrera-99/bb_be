@@ -6,8 +6,9 @@ const indexPropertiesQuery = (p) => {
     if (p.n_bathrooms > 0) conditions.push("p.n_bathrooms >= ?");
     if (p.n_beds > 0) conditions.push("p.n_beds >= ?");
     if (p.square_meters > 0) conditions.push("p.square_meters >= ?");
-    if (p.property_type) conditions.push("LOWER(p.property_type) LIKE ?");
-    if (p.city) conditions.push("LOWER(p.city) LIKE ?");
+    if (p.property_type && p.property_type !== "%")
+        conditions.push("LOWER(p.property_type) LIKE ?");
+    if (p.city && p.city !== "%") conditions.push("LOWER(p.city) LIKE ?");
 
     // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
     const whereClause = conditions.length
