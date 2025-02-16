@@ -39,6 +39,7 @@ const indexPropertiesQuery = (p) => {
             ON p.id = l.property_id
         ${whereClause}
         GROUP BY p.id
+        ORDER BY total_likes DESC
         ${pagination}
     `;
 };
