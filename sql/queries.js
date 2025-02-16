@@ -48,6 +48,11 @@ const showPropertyQuery = `
     WHERE id = ? 
 `;
 
+const showPropertyUserQuery = `
+    SELECT * FROM users
+    WHERE id = ?
+`
+
 const showPropertyLikesQuery = `
     SELECT COUNT(id) AS total_likes FROM likes
     WHERE property_id = ?
@@ -106,6 +111,7 @@ const storeLikeQuery = `
 module.exports = {
     indexPropertiesQuery,
     showPropertyQuery,
+    showPropertyUserQuery,
     showPropertyLikesQuery,
     showPropertyImagesQuery,
     storePropertyQuery,

@@ -3,6 +3,7 @@ const {
     showPropertyQuery,
     showPropertyLikesQuery,
     showPropertyImagesQuery,
+    showPropertyUserQuery,
 } = require("../../sql/queries");
 
 const show = (req, res) => {
@@ -16,6 +17,25 @@ const show = (req, res) => {
             return res.status(404).json({ error: "Property not found" });
         // recuperiamo la property dal risultato del db (sempre array)
         const property = propertyResults[0];
+        if (property.user_id) {
+            // query: recupero nome e cognome di user_id
+            connection.query(
+                showPropertyUserQuery,
+                [property.user_id],
+                (err, userResults) => {
+                    if (err) {
+                        return res
+                            .status(500)
+                            .json({ error: "Database query failed" });
+                    }
+                    if (userResults.length !== 0) {
+                        const host = userResults[0]
+                        property.first_name = host.first_name;
+                        property.last_name = host.last_name
+                    }
+                }
+            );
+        }
         // seconda query: likes by property_id
         connection.query(showPropertyLikesQuery, [id], (err, likesResults) => {
             if (err)
