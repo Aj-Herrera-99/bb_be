@@ -1,9 +1,32 @@
 const CustomError = require("../classes/CustomError");
 const connection = require("../data/db");
-const { showPropertyQuery, storeLikeQuery } = require("../sql/queries");
+const {
+    showPropertyQuery,
+    storeLikeQuery,
+    showLikesByPropertyId,
+} = require("../sql/queries");
+
+const showByPropertyId = (req, res) => {
+    const { property_id } = req.params;
+    if (!property_id) throw new CustomError("Not found", 404);
+    // query: likes in base a property_id
+    connection.query(
+        showLikesByPropertyId,
+        [property_id],
+        (err, likesResults) => {
+            if (err) {
+                return res.status(500).json({ error: "Database query failed" });
+            }
+            res.json({
+                success: true,
+                total_res: likesResults.length,
+                results: likesResults,
+            });
+        }
+    );
+};
 
 const store = (req, res) => {
-    console.log(req.body);
     const { property_id } = req.body;
     if (!property_id) throw new CustomError("Not found", 404);
     // query: controllare se esiste una proprieta con id property_id
@@ -23,4 +46,4 @@ const store = (req, res) => {
     });
 };
 
-module.exports = { store };
+module.exports = { store, showByPropertyId };
