@@ -1,3 +1,4 @@
+const { query } = require("express");
 const connection = require("../../data/db");
 const { indexPropertiesQuery } = require("../../sql/queries");
 
@@ -31,7 +32,7 @@ const index = (req, res) => {
         }
         return false;
     });
-    console.log(propertyArray);
+    console.log(indexPropertiesQuery(propertyObj));
     // query: properties (con filtro)
     connection.query(
         indexPropertiesQuery(propertyObj),
@@ -41,16 +42,35 @@ const index = (req, res) => {
                 console.log(err);
                 return res.status(500).json({ error: "Database query failed" });
             }
-            results.forEach((result) => {
-                const imgEndpoints = result.img_endpoints?.split(",");
-                if (imgEndpoints) {
-                    result.img_endpoints = imgEndpoints;
-                } else {
-                    result.img_endpoints = [];
+            // query per il conteggio totale
+
+            connection.query(
+                "SELECT COUNT(*) AS total_properties FROM properties",
+                (err, countResults) => {
+                    if (err) {
+                        console.log(err);
+                        return res
+                            .status(500)
+                            .json({ error: "Database query failed" });
+                    }
+                    const total_quantity = countResults[0].total_properties;
+                    results.forEach((result) => {
+                        const imgEndpoints = result.img_endpoints?.split(",");
+                        if (imgEndpoints) {
+                            result.img_endpoints = imgEndpoints;
+                        } else {
+                            result.img_endpoints = [];
+                        }
+                    });
+                    // risposta con successo
+                    res.json({
+                        success: true,
+                        total_quantity,
+                        total_res: results.length,
+                        results,
+                    });
                 }
-            });
-            // risposta con successo
-            res.json(results);
+            );
         }
     );
 };

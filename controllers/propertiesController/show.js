@@ -38,7 +38,11 @@ const show = (req, res) => {
                         (res) => res.url
                     );
                     // risposta con successo
-                    res.json(property);
+                    res.json({
+                        success: true,
+                        total_res: propertyResults.length,
+                        results: propertyResults,
+                    });
                 }
             );
         });

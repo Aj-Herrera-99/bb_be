@@ -21,12 +21,11 @@ const storeImage = (req, res) => {
         const files = req.files;
 
         if (!files || files.length === 0) {
-            return res
-                .status(201)
-                .json({
-                    success: true,
-                    message: "Property created without images",
-                });
+            return res.status(201).json({
+                success: true,
+                message: "Property created without images",
+                property: result[0],
+            });
         }
 
         console.log("Starting n.", files.length, "files");
@@ -64,7 +63,6 @@ const storeImage = (req, res) => {
                     console.log("Moving file to:", newPath);
 
                     moveFileAsync(oldPath, newPath);
-
                 }
             );
             processedFiles++;
@@ -80,7 +78,8 @@ const storeImage = (req, res) => {
             console.log("Some files failed processing");
             return res.status(201).json({
                 success: true,
-                message: "Property created successfully, some images are corrupted",
+                message:
+                    "Property created successfully, some images are corrupted",
                 property: result[0],
             });
         }

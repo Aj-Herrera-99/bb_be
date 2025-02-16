@@ -7,7 +7,11 @@ const index = (req, res) => {
     connection.query(sql, (err, results) => {
         if (err)
             return res.status(500).json({ error: "Database query failed" });
-        res.json(results);
+        res.json({
+            success: true,
+            total_res: results.length,
+            results,
+        });
     });
 };
 
@@ -26,7 +30,11 @@ const show = (req, res) => {
         if (!reviewsResults.length) {
             return res.json([]);
         }
-        res.json(reviewsResults);
+        res.json({
+            success: true,
+            total_res: reviewsResults.length,
+            results: reviewsResults,
+        });
     });
 };
 
@@ -74,7 +82,13 @@ const store = (req, res) => {
                 }
 
                 // Risposta in caso di successo
-                return res.status(201).json(review);
+                return res
+                    .status(201)
+                    .json({
+                        success: true,
+                        message: "review created successfully",
+                        review,
+                    });
             }
         );
 
