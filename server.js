@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 
 // trusted proxy for email controller
-app.set('trust proxy', true);
+app.set("trust proxy", true);
 
 // set costant to port
 const port = process?.env.PORT || 3000;
@@ -15,6 +15,7 @@ const notFound = require("./middlewares/notFound");
 const propertiesRouter = require("./routers/propertiesRouter");
 const reviewsRouter = require("./routers/reviewsRouter");
 const emailRouter = require("./routers/emailRouter");
+const likesRouter = require("./routers/likesRouter");
 
 app.use(cors());
 app.use(express.json());
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 app.use("/api/properties", propertiesRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/email", emailRouter);
+app.use("/api/likes", likesRouter);
 // handling errors and notFounds
 app.use(errorsHandler);
 app.use(notFound);

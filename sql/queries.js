@@ -98,6 +98,11 @@ const getHostEmailQuery = `
     WHERE properties.id = ?
 `;
 
+const storeLikeQuery = `
+    INSERT INTO likes (property_id, user_id)
+    VALUES(?, NULL)
+`;
+
 module.exports = {
     indexPropertiesQuery,
     showPropertyQuery,
@@ -112,4 +117,6 @@ module.exports = {
     updateContactTimeQuery,
     insertContactQuery,
     getHostEmailQuery,
+    // likes queries
+    storeLikeQuery,
 };
