@@ -16,6 +16,7 @@ const propertiesRouter = require("./routers/propertiesRouter");
 const reviewsRouter = require("./routers/reviewsRouter");
 const emailRouter = require("./routers/emailRouter");
 const likesRouter = require("./routers/likesRouter");
+const aiRouter = require("./routers/aiRouter");
 
 app.use(cors());
 app.use(express.json());
@@ -31,6 +32,7 @@ app.use("/api/properties", propertiesRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/email", emailRouter);
 app.use("/api/likes", likesRouter);
+app.use("/api/ai", aiRouter);
 // handling errors and notFounds
 app.use(errorsHandler);
 app.use(notFound);

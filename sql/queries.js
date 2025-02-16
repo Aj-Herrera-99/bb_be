@@ -114,6 +114,14 @@ const showLikesByPropertyId = `
     WHERE property_id = ?
 `;
 
+const getPropertyDetailsQuery = `
+    SELECT p.*, GROUP_CONCAT(pi.url) as images
+    FROM properties p
+    LEFT JOIN property_images pi ON p.id = pi.property_id
+    WHERE p.id = ?
+    GROUP BY p.id
+`;
+
 module.exports = {
     indexPropertiesQuery,
     showPropertyQuery,
@@ -132,4 +140,5 @@ module.exports = {
     // likes queries
     storeLikeQuery,
     showLikesByPropertyId,
+    getPropertyDetailsQuery,
 };
