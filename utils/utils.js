@@ -37,8 +37,8 @@ function validateProperty(propertyObj) {
         errors.push("Il titolo dell'inserzione non può essere vuoto!");
     if (!address || !address.trim().length)
         errors.push("L'indirizzo non può essere vuoto!");
-    if (!zipcode || !zipcode.trim().length)
-        errors.push("Il codice postale non può essere vuoto!");
+    if (!zipcode || (!isNaN(zipcode) && Number(zipcode) <= 0) || !zipcode.trim().length)
+        errors.push("Il codice postale non può essere vuoto o negativo!");
     if (!property_type || !property_type.trim().length)
         errors.push("Il tipo di proprietà non può essere vuoto!");
     if (!city || !city.trim().length)
