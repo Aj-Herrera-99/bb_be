@@ -1,12 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { index, destroy, show, store } = require("../controllers/reviewsController");
+const {
+  index,
+  destroy,
+  showByPropertyId,
+  store,
+} = require("../controllers/reviewsController");
 
 // index
 router.get("/", index);
 
 // show
-router.get("/:id", show);
+router.get("/:id", showByPropertyId);
 
 // store
 router.post("/", store);

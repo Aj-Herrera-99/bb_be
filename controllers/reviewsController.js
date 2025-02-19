@@ -1,4 +1,5 @@
 const connection = require("../data/db");
+const { showRevsByPropertyIdQuery } = require("../sql/queries");
 
 const index = (req, res) => {
   // prepariamo la query
@@ -14,26 +15,28 @@ const index = (req, res) => {
   });
 };
 
-const show = (req, res) => {
+const showByPropertyId = (req, res) => {
   // recuperiamo l'id della proprieta dall' URL
   const id = req.params.id;
   // prepariamo la query per le reviews di una proprieta
-  const reviewsSql = `
-        SELECT * FROM reviews 
-        WHERE property_id = ?
-    `;
+  const { page } = req.query;
+  console.log(showRevsByPropertyIdQuery(page));
   // eseguiamo la prima query per le reviews
-  connection.query(reviewsSql, [id], (err, reviewsResults) => {
-    if (err) return res.status(500).json({ error: "Database query failed" });
-    if (!reviewsResults.length) {
-      return res.json([]);
+  connection.query(
+    showRevsByPropertyIdQuery(page),
+    [id],
+    (err, reviewsResults) => {
+      if (err) return res.status(500).json({ error: "Database query failed" });
+      if (!reviewsResults.length) {
+        return res.json([]);
+      }
+      res.json({
+        success: true,
+        total_res: reviewsResults.length,
+        results: reviewsResults,
+      });
     }
-    res.json({
-      success: true,
-      total_res: reviewsResults.length,
-      results: reviewsResults,
-    });
-  });
+  );
 };
 
 const store = (req, res) => {
@@ -113,4 +116,4 @@ const destroy = (req, res) => {
   });
 };
 
-module.exports = { index, destroy, show, store };
+module.exports = { index, destroy, showByPropertyId, store };

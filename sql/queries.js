@@ -1,32 +1,32 @@
 const indexPropertiesQuery = (p) => {
-    // Creoun array di condizioni valide
-    const conditions = [];
+  // Creoun array di condizioni valide
+  const conditions = [];
 
-    if (p.n_bedrooms > 0) conditions.push("p.n_bedrooms >= ?");
-    if (p.n_bathrooms > 0) conditions.push("p.n_bathrooms >= ?");
-    if (p.n_beds > 0) conditions.push("p.n_beds >= ?");
-    if (p.square_meters > 0) conditions.push("p.square_meters >= ?");
-    if (p.property_type && p.property_type !== "%")
-        conditions.push("LOWER(p.property_type) LIKE ?");
-    if (p.city && p.city !== "%") conditions.push("LOWER(p.city) LIKE ?");
+  if (p.n_bedrooms > 0) conditions.push("p.n_bedrooms >= ?");
+  if (p.n_bathrooms > 0) conditions.push("p.n_bathrooms >= ?");
+  if (p.n_beds > 0) conditions.push("p.n_beds >= ?");
+  if (p.square_meters > 0) conditions.push("p.square_meters >= ?");
+  if (p.property_type && p.property_type !== "%")
+    conditions.push("LOWER(p.property_type) LIKE ?");
+  if (p.city && p.city !== "%") conditions.push("LOWER(p.city) LIKE ?");
 
-    // paginazione
-    const resultsPerPage = 4;
-    let pagination = "";
-    if (p?.page && p.page > 0) {
-        pagination = `LIMIT ${resultsPerPage} OFFSET ${
-            p.page * resultsPerPage - resultsPerPage
-        }`;
-    } else {
-        pagination = `LIMIT ${resultsPerPage} OFFSET 0`;
-    }
+  // paginazione
+  const resultsPerPage = 4;
+  let pagination = "";
+  if (p?.page && p.page > 0) {
+    pagination = `LIMIT ${resultsPerPage} OFFSET ${
+      p.page * resultsPerPage - resultsPerPage
+    }`;
+  } else {
+    pagination = `LIMIT ${resultsPerPage} OFFSET 0`;
+  }
 
-    // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
-    const whereClause = conditions.length
-        ? `WHERE ${conditions.join(" AND ")}`
-        : "";
+  // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
+  const whereClause = conditions.length
+    ? `WHERE ${conditions.join(" AND ")}`
+    : "";
 
-    return `
+  return `
         SELECT p.id, p.user_id, p.title, p.description, p.n_bedrooms,
             p.n_bathrooms, p.n_beds, p.square_meters, p.address, p.zipcode,
             p.city, p.property_type,
@@ -122,23 +122,41 @@ const getPropertyDetailsQuery = `
     GROUP BY p.id
 `;
 
+const showRevsByPropertyIdQuery = (page) => {
+  const reviewsPerPage = 4;
+  let pagination = "";
+  if (page) {
+    pagination = `LIMIT ${reviewsPerPage} OFFSET ${
+      page * reviewsPerPage - reviewsPerPage
+    }`;
+  } else {
+    pagination = `LIMIT ${reviewsPerPage}  OFFSET 0 `;
+  }
+
+  return `SELECT * FROM reviews 
+        WHERE property_id = ?
+        ${pagination}
+        `;
+};
+
 module.exports = {
-    indexPropertiesQuery,
-    showPropertyQuery,
-    showPropertyUserQuery,
-    showPropertyLikesQuery,
-    showPropertyImagesQuery,
-    storePropertyQuery,
-    storePropertyShowLastProperty,
-    storePropertyStoreImg,
-    deletePropertyQuery,
-    // Add new email queries
-    checkIpContactQuery,
-    updateContactTimeQuery,
-    insertContactQuery,
-    getHostEmailQuery,
-    // likes queries
-    storeLikeQuery,
-    showLikesByPropertyId,
-    getPropertyDetailsQuery,
+  indexPropertiesQuery,
+  showPropertyQuery,
+  showPropertyUserQuery,
+  showPropertyLikesQuery,
+  showPropertyImagesQuery,
+  storePropertyQuery,
+  storePropertyShowLastProperty,
+  storePropertyStoreImg,
+  deletePropertyQuery,
+  // Add new email queries
+  checkIpContactQuery,
+  updateContactTimeQuery,
+  insertContactQuery,
+  getHostEmailQuery,
+  // likes queries
+  storeLikeQuery,
+  showLikesByPropertyId,
+  getPropertyDetailsQuery,
+  showRevsByPropertyIdQuery,
 };
