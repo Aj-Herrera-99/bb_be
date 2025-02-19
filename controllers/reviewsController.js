@@ -30,10 +30,22 @@ const showByPropertyId = (req, res) => {
       if (!reviewsResults.length) {
         return res.json([]);
       }
-      res.json({
-        success: true,
-        total_res: reviewsResults.length,
-        results: reviewsResults,
+      const countSql = `SELECT COUNT(id) AS total_reviews
+       FROM reviews
+                      WHERE property_id=?
+                       GROUP BY property_id`;
+      connection.query(countSql, [id], (err, countResults) => {
+        if (err)
+          return res.status(500).json({ error: "Database query failed" });
+        if (!countResults.length) {
+          return res.json([]);
+        }
+        res.json({
+          success: true,
+          total_quantity: countResults[0].total_reviews,
+          total_res: reviewsResults.length,
+          results: reviewsResults,
+        });
       });
     }
   );
