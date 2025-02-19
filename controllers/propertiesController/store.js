@@ -1,6 +1,7 @@
 const connection = require("../../data/db");
 const { storePropertyQuery } = require("../../sql/queries");
 const { validateProperty } = require("../../utils/utils");
+const { upsertProperty } = require('../../services/embeddingService');
 
 let defaultPropertyStoredObj = {
     user_id: null,
@@ -40,10 +41,27 @@ const store = (req, res, next) => {
         (val) => val
     );
     // query: property (insert into)
-    connection.query(storePropertyQuery, propertyStoredArr, (err, _res) => {
+    connection.query(storePropertyQuery, propertyStoredArr, async (err, result) => {
         if (err) {
             return res.status(500).json({ error: "Database query failed" });
         }
+        
+        try {
+            // Get the newly created property
+            const [newProperty] = await connection.promise().query(
+                'SELECT * FROM properties WHERE id = ?',
+                [result.insertId]
+            );
+            
+            // Add to Pinecone
+            await upsertProperty(newProperty[0]);
+            
+            console.log("Property added to Pinecone successfully");
+        } catch (error) {
+            console.error("Failed to add property to Pinecone:", error);
+            // Continue with the response even if Pinecone sync fails
+        }
+        
         console.log("Store middleware - DB query completed");
         // Check if we have files
         if (!req.files || req.files.length === 0) {
