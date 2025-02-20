@@ -1,46 +1,57 @@
+function addPropertiesWhereClause(p) {
+    // Creoun array di condizioni valide
+    const conditions = [];
+
+    if (p.n_bedrooms > 0) conditions.push("p.n_bedrooms >= ?");
+    if (p.n_bathrooms > 0) conditions.push("p.n_bathrooms >= ?");
+    if (p.n_beds > 0) conditions.push("p.n_beds >= ?");
+    if (p.square_meters > 0) conditions.push("p.square_meters >= ?");
+    if (p.property_type && p.property_type !== "%")
+        conditions.push("LOWER(p.property_type) LIKE ?");
+    if (p.city && p.city !== "%") conditions.push("LOWER(p.city) LIKE ?");
+
+    // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
+    return conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+}
+
 const indexPropertiesQuery = (p) => {
-  // Creoun array di condizioni valide
-  const conditions = [];
+    // paginazione
+    const resultsPerPage = 4;
+    let pagination = "";
+    if (p?.page && p.page > 0) {
+        pagination = `LIMIT ${resultsPerPage} OFFSET ${
+            p.page * resultsPerPage - resultsPerPage
+        }`;
+    } else {
+        pagination = `LIMIT ${resultsPerPage} OFFSET 0`;
+    }
 
-  if (p.n_bedrooms > 0) conditions.push("p.n_bedrooms >= ?");
-  if (p.n_bathrooms > 0) conditions.push("p.n_bathrooms >= ?");
-  if (p.n_beds > 0) conditions.push("p.n_beds >= ?");
-  if (p.square_meters > 0) conditions.push("p.square_meters >= ?");
-  if (p.property_type && p.property_type !== "%")
-    conditions.push("LOWER(p.property_type) LIKE ?");
-  if (p.city && p.city !== "%") conditions.push("LOWER(p.city) LIKE ?");
+    const whereClause = addPropertiesWhereClause(p);
 
-  // paginazione
-  const resultsPerPage = 4;
-  let pagination = "";
-  if (p?.page && p.page > 0) {
-    pagination = `LIMIT ${resultsPerPage} OFFSET ${
-      p.page * resultsPerPage - resultsPerPage
-    }`;
-  } else {
-    pagination = `LIMIT ${resultsPerPage} OFFSET 0`;
-  }
+    return `
+    SELECT p.id, p.user_id, p.title, p.description, p.n_bedrooms,
+    p.n_bathrooms, p.n_beds, p.square_meters, p.address, p.zipcode,
+    p.city, p.property_type,
+    GROUP_CONCAT(DISTINCT pi.url ORDER BY pi.id ASC) AS img_endpoints,
+    COUNT(DISTINCT l.id) as total_likes
+    FROM properties AS p
+    LEFT JOIN property_images AS pi
+    ON p.id = pi.property_id
+    LEFT JOIN likes AS l
+    ON p.id = l.property_id
+    ${whereClause}
+    GROUP BY p.id
+    ORDER BY total_likes DESC
+    ${pagination}
+    `;
+};
 
-  // Se ci sono condizioni, unione con "AND", altrimenti stringa vuota
-  const whereClause = conditions.length
-    ? `WHERE ${conditions.join(" AND ")}`
-    : "";
+const getPropertiesCountQuery = (p) => {
+    const whereClause = addPropertiesWhereClause(p);
 
-  return `
-        SELECT p.id, p.user_id, p.title, p.description, p.n_bedrooms,
-            p.n_bathrooms, p.n_beds, p.square_meters, p.address, p.zipcode,
-            p.city, p.property_type,
-            GROUP_CONCAT(DISTINCT pi.url ORDER BY pi.id ASC) AS img_endpoints,
-            COUNT(DISTINCT l.id) as total_likes
-        FROM properties AS p
-        LEFT JOIN property_images AS pi
-            ON p.id = pi.property_id
-        LEFT JOIN likes AS l
-            ON p.id = l.property_id
+    return `
+        SELECT COUNT(*) AS total_properties FROM properties AS p
         ${whereClause}
-        GROUP BY p.id
-        ORDER BY total_likes DESC
-        ${pagination}
     `;
 };
 
@@ -123,40 +134,41 @@ const getPropertyDetailsQuery = `
 `;
 
 const showRevsByPropertyIdQuery = (page) => {
-  const reviewsPerPage = 4;
-  let pagination = "";
-  if (page) {
-    pagination = `LIMIT ${reviewsPerPage} OFFSET ${
-      page * reviewsPerPage - reviewsPerPage
-    }`;
-  } else {
-    pagination = `LIMIT ${reviewsPerPage}  OFFSET 0 `;
-  }
+    const reviewsPerPage = 4;
+    let pagination = "";
+    if (page) {
+        pagination = `LIMIT ${reviewsPerPage} OFFSET ${
+            page * reviewsPerPage - reviewsPerPage
+        }`;
+    } else {
+        pagination = `LIMIT ${reviewsPerPage}  OFFSET 0 `;
+    }
 
-  return `SELECT * FROM reviews 
+    return `SELECT * FROM reviews 
         WHERE property_id = ?
         ${pagination}
         `;
 };
 
 module.exports = {
-  indexPropertiesQuery,
-  showPropertyQuery,
-  showPropertyUserQuery,
-  showPropertyLikesQuery,
-  showPropertyImagesQuery,
-  storePropertyQuery,
-  storePropertyShowLastProperty,
-  storePropertyStoreImg,
-  deletePropertyQuery,
-  // Add new email queries
-  checkIpContactQuery,
-  updateContactTimeQuery,
-  insertContactQuery,
-  getHostEmailQuery,
-  // likes queries
-  storeLikeQuery,
-  showLikesByPropertyId,
-  getPropertyDetailsQuery,
-  showRevsByPropertyIdQuery,
+    indexPropertiesQuery,
+    getPropertiesCountQuery,
+    showPropertyQuery,
+    showPropertyUserQuery,
+    showPropertyLikesQuery,
+    showPropertyImagesQuery,
+    storePropertyQuery,
+    storePropertyShowLastProperty,
+    storePropertyStoreImg,
+    deletePropertyQuery,
+    // Add new email queries
+    checkIpContactQuery,
+    updateContactTimeQuery,
+    insertContactQuery,
+    getHostEmailQuery,
+    // likes queries
+    storeLikeQuery,
+    showLikesByPropertyId,
+    getPropertyDetailsQuery,
+    showRevsByPropertyIdQuery,
 };

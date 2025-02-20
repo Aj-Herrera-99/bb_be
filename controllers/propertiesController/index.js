@@ -1,6 +1,8 @@
-const { query } = require("express");
 const connection = require("../../data/db");
-const { indexPropertiesQuery } = require("../../sql/queries");
+const {
+    indexPropertiesQuery,
+    getPropertiesCountQuery,
+} = require("../../sql/queries");
 
 const defaultPropertyObj = {
     n_bedrooms: 0,
@@ -32,7 +34,6 @@ const index = (req, res) => {
         }
         return false;
     });
-    console.log(indexPropertiesQuery(propertyObj));
     // query: properties (con filtro)
     connection.query(
         indexPropertiesQuery(propertyObj),
@@ -42,10 +43,12 @@ const index = (req, res) => {
                 console.log(err);
                 return res.status(500).json({ error: "Database query failed" });
             }
+            console.log(getPropertiesCountQuery(propertyObj));
+            console.log(propertyArray);
             // query per il conteggio totale
-
             connection.query(
-                "SELECT COUNT(*) AS total_properties FROM properties",
+                getPropertiesCountQuery(propertyObj),
+                propertyArray,
                 (err, countResults) => {
                     if (err) {
                         console.log(err);
