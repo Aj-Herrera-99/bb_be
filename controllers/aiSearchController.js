@@ -8,7 +8,7 @@ const groq = new Groq({
 
 const searchChat = async (req, res, next) => {
   try {
-    const { query } = req.body;
+    const { query, language = 'it' } = req.body;
 
     if (!query) {
       throw new CustomError("Search query is required", 400);
@@ -33,11 +33,25 @@ const searchChat = async (req, res, next) => {
 
     const finalPrompt = `${contextPrompt}\n\nUser Query: ${query}\n\nPlease provide a helpful response about these properties, addressing the user's query. If relevant, include specific details from the properties shown.`;
 
+    const systemPrompt = `Sei un esperto agente immobiliare italiano. 
+    Il tuo compito è:
+    1. Analizzare attentamente le proprietà fornite
+    2. Confrontarle con la richiesta dell'utente
+    3. Fornire una risposta dettagliata che includa:
+       - Proprietà che corrispondono esattamente ai criteri
+       - Alternative interessanti simili
+       - Dettagli su prezzo/mq se rilevanti
+       - Suggerimenti sulla zona
+    4. Organizzare la risposta in sezioni chiare
+    5. Usare un tono professionale ma amichevole
+    
+    Rispondi sempre in italiano a meno che non sia specificato diversamente.`;
+
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
           role: "system",
-          content: "You are a knowledgeable real estate assistant. Provide clear, concise answers about properties, focusing on the most relevant details for the user's query. If suggesting properties, explain why they match the user's needs."
+          content: systemPrompt
         },
         {
           role: "user",
@@ -55,8 +69,16 @@ const searchChat = async (req, res, next) => {
       relevantProperties: relevantProperties.map(match => ({
         propertyId: match.metadata.propertyId,
         title: match.metadata.title,
+        description: match.metadata.description,
         city: match.metadata.city,
         propertyType: match.metadata.propertyType,
+        nBedrooms: match.metadata.nBedrooms,
+        nBathrooms: match.metadata.nBathrooms,
+        nBeds: match.metadata.nBeds,
+        squareMeters: match.metadata.squareMeters,
+        address: match.metadata.address,
+        zipcode: match.metadata.zipcode,
+        hostDescription: match.metadata.hostDescription,
         score: match.score
       }))
     });

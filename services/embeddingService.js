@@ -7,7 +7,6 @@ const openai = new OpenAI({
 
 const pinecone = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY,
-  environment: process.env.PINECONE_ENVIRONMENT
 });
 
 const index = pinecone.index(process.env.PINECONE_INDEX);
@@ -28,7 +27,11 @@ async function createPropertyDocument(property) {
     Type: ${property.property_type}
     Bedrooms: ${property.n_bedrooms}
     Bathrooms: ${property.n_bathrooms}
+    Beds: ${property.n_beds}
     Square meters: ${property.square_meters}
+    Address: ${property.address}
+    Zipcode: ${property.zipcode}
+    Host Description: ${property.host_description || ''}
   `;
 
   const embedding = await generateEmbedding(propertyText);
@@ -41,7 +44,14 @@ async function createPropertyDocument(property) {
       title: property.title,
       description: property.description,
       city: property.city,
-      propertyType: property.property_type
+      propertyType: property.property_type,
+      nBedrooms: property.n_bedrooms,
+      nBathrooms: property.n_bathrooms,
+      nBeds: property.n_beds,
+      squareMeters: property.square_meters,
+      address: property.address,
+      zipcode: property.zipcode,
+      hostDescription: property.host_description
     }
   };
 }
